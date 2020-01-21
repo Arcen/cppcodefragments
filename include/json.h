@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <limits>
 #include <string.h>
 #include <math.h>
 #include <limits.h>
@@ -401,6 +402,12 @@ namespace cppcodefragments {
 					set_false();
 				}
 			}
+			static std::shared_ptr<json_value> create_null()
+			{
+				auto value = std::make_shared<json_value>();
+				value->set_null();
+				return value;
+			}
 			bool operator==(const json_value& rhs) const { return equal(rhs); }
 			bool operator<(const json_value& rhs) const { return compare(rhs) < 0; }
 			bool operator>(const json_value& rhs) const { return compare(rhs) > 0; }
@@ -571,7 +578,12 @@ namespace cppcodefragments {
 			bool is_array() const { return type == array_type; }
 			bool is_primitive() const { return is_null() || is_bool() || is_number() || is_string(); }
 			bool is_valid_type() const { return is_primitive() || is_object() || is_array(); }
-			size_t size() const { return (is_array() || is_object()) ? array.size() : 0; }
+			size_t size() const
+			{
+				if(is_array() || is_object()) return array.size();
+				if(is_string()) return string.size();
+				return 0;
+			}
 			bool get_bool() const { return is_true(); }
 			std::string get_string() const { return is_string() ? string : std::string(); }
 			std::string get_number() const { return is_number() ? string : std::string(); }
@@ -808,6 +820,27 @@ namespace cppcodefragments {
 				if(!serialize(oh)) return std::string();
 				if(!oh.end_document()) return std::string();
 				return os.get();
+			}
+			double to_double() const
+			{
+				if(is_number()){
+					double real = 0;
+					if(json_parser::number_to_double(string, real)){
+						return real;
+					}
+				}
+				return 0;
+			}
+			template<typename T>
+			T to_integer() const
+			{
+				if(is_number()){
+					T integer = 0;
+					if(json_parser::number_to_integer(string, integer)){
+						return integer;
+					}
+				}
+				return 0;
 			}
 			class data_handler : public handler_interface{
 				struct stack_element{
@@ -1122,6 +1155,57 @@ namespace cppcodefragments {
 					if(it != end) return false;
 					return true;
 				}
+				template<typename T>
+				static bool number_to_integer(const std::string& number, T& integer)
+				{
+					auto it = number.begin();
+					auto end = number.end();
+					integer = 0;
+					if(it == end) return false;
+					// sign
+					bool minus = false;
+					if(*it == '-'){
+						++it;
+						minus = true;
+					}
+					if(it == end) return false;
+					// integer
+					if(*it == '0'){
+						++it;
+					} else if('1' <= *it && *it <= '9'){
+						while(it != end && '0' <= *it && *it <= '9'){
+							if(std::numeric_limits<T>::max() / 10 < integer){
+								return false;
+							}
+							integer *= 10;
+							if(std::numeric_limits<T>::max() - ((*it) - '0') < integer){
+								return false;
+							}
+							integer += (*it) - '0';
+							++it;
+						}
+					} else{
+						return false;
+					}
+					// fraction
+					if(it != end && *it == '.'){
+						return false;
+					}
+					if(minus) {
+						if(std::numeric_limits<T>::is_signed()){
+							if(integer){
+								return false;
+							}
+						}
+						integer *= -1;
+					}
+					// exponent
+					if(it != end && (*it == 'e' || *it == 'E')){
+						return false;
+					}
+					if(it != end) return false;
+					return true;
+				}
 			private:
 				static bool parse_string(input& in, std::string& string)
 				{
@@ -1355,6 +1439,20 @@ namespace cppcodefragments {
 				if(!jp.parse(is)) return nullptr;
 				if(!dh.eof()) return nullptr;
 				return result;
+			}
+			static std::shared_ptr<json_value> parse_partial(std::string& in)
+			{
+				std::shared_ptr<json_value> result = std::make_shared<json_value>();
+				data_handler dh(result.get());
+				json_parser jp(dh);
+				input_string is(in);
+				if(!jp.parse(is)) return nullptr;
+				if(!dh.eof()) return nullptr;
+				if(in.size() >= is.size()){
+					in = in.substr(in.size() - is.size());
+					return result;
+				}
+				return nullptr;
 			}
 			// https://tools.ietf.org/html/rfc7396
 			static std::shared_ptr<json_value> merge_patch(std::shared_ptr<json_value> target, const std::shared_ptr<json_value>& patch)

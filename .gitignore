@@ -7,8 +7,9 @@ Makefile
 aclocal.m4
 autom4te.cache
 autoscan.log
-config.guess
+config.*
 configure.scan
+configure
 depcomp
 install-sh
 libltdl
