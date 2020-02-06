@@ -1,4 +1,12 @@
-TESTS = json_test
-check_PROGRAMS = json_test
-json_test_SOURCES = json.cc
-json_test_CXXFLAGS = -I../include -std=c++11
+TESTS = json network uri compress.sh
+noinst_PROGRAMS = echo_server http_server compress
+AM_CXXFLAGS=-I../include -std=c++11
+
+check_PROGRAMS = json network uri
+json_SOURCES = json.cc
+network_SOURCES = network.cc
+uri_SOURCES = uri.cc
+
+echo_server_SOURCES = echo_server.cc
+http_server_SOURCES = http_server.cc
+compress_SOURCES = compress.cc

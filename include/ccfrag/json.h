@@ -13,7 +13,7 @@
 #include <math.h>
 #include <limits.h>
 
-namespace cppcodefragments {
+namespace ccfrag {
 	// specification
 	// https://tools.ietf.org/html/rfc8259
 	// https://www.json.org/json-en.html

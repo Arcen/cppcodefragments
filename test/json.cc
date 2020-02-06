@@ -1,8 +1,8 @@
-#include <json.h>
+#include <ccfrag/json.h>
 #include <vector>
 #include <string>
 
-using namespace cppcodefragments;
+using namespace ccfrag;
 
 bool test_json(const std::string& pattern, const std::string& normalized = std::string())
 {
@@ -72,27 +72,27 @@ bool test_patch(const std::string& target, const std::string& patch, const std::
 	return true;
 }
 
-int main(int argc, char *argv[])
+bool json_test()
 {
-	if(!test_json("[]")) return -1;
-	if(!test_json("{}")) return -1;
-	if(!test_json("[0]")) return -1;
-	if(!test_json("[0,1]")) return -1;
-	if(!test_json("[true]")) return -1;
-	if(!test_json("[false]")) return -1;
-	if(!test_json("[null]")) return -1;
-	if(!test_json("[-123.456e-10]")) return -1;
-	if(!test_json("[\"\"]")) return -1;
-	if(!test_json("[\"foo\"]")) return -1;
-	if(!test_json("[[[[]]]]")) return -1;
-	if(!test_json("[{},[],[],[[]],{}]")) return -1;
-	if(!test_json("{\"key\":null}")) return -1;
-	if(!test_json("{\"key\":[]}")) return -1;
-	if(!test_json("{\"key\":{}}")) return -1;
-	if(!test_json("{\"key\":\"value\"}")) return -1;
-	if(!test_json("{\"key\":\"value\",\"key2\":\"value\"}")) return -1;
-	if(!test_json(" [ \r0\n, \t1  ]", "[0,1]")) return -1;
-	if(!test_json("  {\n \"key\"\t: \"value\"\r\n,  \"key2\" : \"value\"\n}\n", "{\"key\":\"value\",\"key2\":\"value\"}")) return -1;
+	if(!test_json("[]")) return false;
+	if(!test_json("{}")) return false;
+	if(!test_json("[0]")) return false;
+	if(!test_json("[0,1]")) return false;
+	if(!test_json("[true]")) return false;
+	if(!test_json("[false]")) return false;
+	if(!test_json("[null]")) return false;
+	if(!test_json("[-123.456e-10]")) return false;
+	if(!test_json("[\"\"]")) return false;
+	if(!test_json("[\"foo\"]")) return false;
+	if(!test_json("[[[[]]]]")) return false;
+	if(!test_json("[{},[],[],[[]],{}]")) return false;
+	if(!test_json("{\"key\":null}")) return false;
+	if(!test_json("{\"key\":[]}")) return false;
+	if(!test_json("{\"key\":{}}")) return false;
+	if(!test_json("{\"key\":\"value\"}")) return false;
+	if(!test_json("{\"key\":\"value\",\"key2\":\"value\"}")) return false;
+	if(!test_json(" [ \r0\n, \t1  ]", "[0,1]")) return false;
+	if(!test_json("  {\n \"key\"\t: \"value\"\r\n,  \"key2\" : \"value\"\n}\n", "{\"key\":\"value\",\"key2\":\"value\"}")) return false;
 	//RFC-exaples https://www.ietf.org/rfc/rfc4627.txt
 	std::string rfc_example1 = 
 	"{"
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 			"},"
 		"\"IDs\":[116,943,234,38793]}"
 	"}";
-	if(!test_json(rfc_example1)) return -1;
+	if(!test_json(rfc_example1)) return false;
 	std::string rfc_example2 =
 	"["
 		"{"
@@ -131,25 +131,25 @@ int main(int argc, char *argv[])
 			"\"Country\":\"US\""
 		"}"
 	"]";
-	if(!test_json(rfc_example2)) return -1;
+	if(!test_json(rfc_example2)) return false;
 	// string test
-	if(!test_json("[\"\\\"\"]")) return -1;
-	if(!test_json("[\"\\\\\"]")) return -1;
-	if(!test_json("[\"\\/\"]", "[\"/\"]")) return -1;
-	if(!test_json("[\"\\b\"]")) return -1;
-	if(!test_json("[\"\\f\"]")) return -1;
-	if(!test_json("[\"\\n\"]")) return -1;
-	if(!test_json("[\"\\r\"]")) return -1;
-	if(!test_json("[\"\\t\"]")) return -1;
-	if(!test_json("[\"\\u0000\"]")) return -1;
-	if(!test_json("[\"\\u0020\"]", "[\" \"]")) return -1;
-	if(!test_json("[\"\\u000d\"]", "[\"\\r\"]")) return -1;
-	if(!test_json("[\"\\u000A\"]", "[\"\\n\"]")) return -1;
-	if(!test_json("[\"\\uD834\\udd1e\"]", "[\"\\ud834\\udd1e\"]")) return -1;
-	if(!test_json("[\"\\ud7ff\"]", "[\"\xED\x9F\xBF\"]")) return -1;
-	if(!test_json("[\"\\ue000\"]", "[\"\xEE\x80\x80\"]")) return -1;
-	if(!test_json("[\"\\ud800\\udc00\"]")) return -1;
-	if(!test_json("[\"\\udbff\\udfff\"]")) return -1;
+	if(!test_json("[\"\\\"\"]")) return false;
+	if(!test_json("[\"\\\\\"]")) return false;
+	if(!test_json("[\"\\/\"]", "[\"/\"]")) return false;
+	if(!test_json("[\"\\b\"]")) return false;
+	if(!test_json("[\"\\f\"]")) return false;
+	if(!test_json("[\"\\n\"]")) return false;
+	if(!test_json("[\"\\r\"]")) return false;
+	if(!test_json("[\"\\t\"]")) return false;
+	if(!test_json("[\"\\u0000\"]")) return false;
+	if(!test_json("[\"\\u0020\"]", "[\" \"]")) return false;
+	if(!test_json("[\"\\u000d\"]", "[\"\\r\"]")) return false;
+	if(!test_json("[\"\\u000A\"]", "[\"\\n\"]")) return false;
+	if(!test_json("[\"\\uD834\\udd1e\"]", "[\"\\ud834\\udd1e\"]")) return false;
+	if(!test_json("[\"\\ud7ff\"]", "[\"\xED\x9F\xBF\"]")) return false;
+	if(!test_json("[\"\\ue000\"]", "[\"\xEE\x80\x80\"]")) return false;
+	if(!test_json("[\"\\ud800\\udc00\"]")) return false;
+	if(!test_json("[\"\\udbff\\udfff\"]")) return false;
 	// number test
 	std::vector<std::string> signs = {"", "-"};
 	std::vector<std::string> integer = {"0", "1", "123", "123456789", "987321"};
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 		for(auto iti = integer.begin(); iti != integer.end(); ++iti){
 			for(auto itf = fraction.begin(); itf != fraction.end(); ++itf){
 				for(auto ite = exponent.begin(); ite != exponent.end(); ++ite){
-					if(!test_json("[" + *its + *iti + *itf + *ite + "]")) return -1;
+					if(!test_json("[" + *its + *iti + *itf + *ite + "]")) return false;
 				}
 			}
 		}
@@ -203,22 +203,22 @@ int main(int argc, char *argv[])
 	json::json_value j_patch;
 	json::json_value j_result;
 	if(!j_base.parse(rfc7396_base)){
-		return -1;
+		return false;
 	}
 	if(!j_patch.parse(rfc7396_patch)){
-		return -1;
+		return false;
 	}
 	if(!j_result.parse(rfc7396_result)){
-		return -1;
+		return false;
 	}
 	auto patched = json::json_value::merge_patch(j_base.clone(), j_patch.clone());
 	if(!patched){
-		return -1;
+		return false;
 	}
 	if(!patched->equal(j_result)){
 		printf("%s\n", patched->to_str().c_str());
 		printf("%s\n", j_result.to_str().c_str());
-		return -1;
+		return false;
 	}
 
 	// json patch test
@@ -228,109 +228,111 @@ int main(int argc, char *argv[])
 		{ "op": "add", "path": "/baz", "value": "qux" }
 	])";
 	std::string rfc6902_a1_result = R"({"baz": "qux","foo": "bar"})";
-	if(!test_patch(rfc6902_a1_target, rfc6902_a1_patch, rfc6902_a1_result)) return -1;
+	if(!test_patch(rfc6902_a1_target, rfc6902_a1_patch, rfc6902_a1_result)) return false;
 
 	std::string rfc6902_a2_target = R"({ "foo": [ "bar", "baz" ] })";
 	std::string rfc6902_a2_patch = R"([
 		{ "op": "add", "path": "/foo/1", "value": "qux" }
 	])";
 	std::string rfc6902_a2_result = R"({ "foo": [ "bar", "qux", "baz" ] })";
-	if(!test_patch(rfc6902_a2_target, rfc6902_a2_patch, rfc6902_a2_result)) return -1;
+	if(!test_patch(rfc6902_a2_target, rfc6902_a2_patch, rfc6902_a2_result)) return false;
 
 	std::string rfc6902_a3_target = R"({"baz": "qux","foo": "bar"})";
 	std::string rfc6902_a3_patch = R"([
 		{ "op": "remove", "path": "/baz" }
 	])";
 	std::string rfc6902_a3_result = R"({ "foo": "bar" })";
-	if(!test_patch(rfc6902_a3_target, rfc6902_a3_patch, rfc6902_a3_result)) return -1;
+	if(!test_patch(rfc6902_a3_target, rfc6902_a3_patch, rfc6902_a3_result)) return false;
 
 	std::string rfc6902_a4_target = R"({ "foo": [ "bar", "qux", "baz" ] })";
 	std::string rfc6902_a4_patch = R"([
 		{ "op": "remove", "path": "/foo/1" }
 	])";
 	std::string rfc6902_a4_result = R"({ "foo": [ "bar", "baz" ] })";
-	if(!test_patch(rfc6902_a4_target, rfc6902_a4_patch, rfc6902_a4_result)) return -1;
+	if(!test_patch(rfc6902_a4_target, rfc6902_a4_patch, rfc6902_a4_result)) return false;
 
 	std::string rfc6902_a5_target = R"(  {"baz": "qux","foo": "bar"})";
 	std::string rfc6902_a5_patch = R"([
 		{ "op": "replace", "path": "/baz", "value": "boo" }
 	])";
 	std::string rfc6902_a5_result = R"({"baz": "boo","foo": "bar"})";
-	if(!test_patch(rfc6902_a5_target, rfc6902_a5_patch, rfc6902_a5_result)) return -1;
+	if(!test_patch(rfc6902_a5_target, rfc6902_a5_patch, rfc6902_a5_result)) return false;
 
 	std::string rfc6902_a6_target = R"({"foo": {"bar": "baz","waldo": "fred"},"qux": {"corge": "grault"}})";
 	std::string rfc6902_a6_patch = R"([
 		{ "op": "move", "from": "/foo/waldo", "path": "/qux/thud" }
 	])";
 	std::string rfc6902_a6_result = R"({"foo": {"bar": "baz"},"qux": {"corge": "grault","thud": "fred"}})";
-	if(!test_patch(rfc6902_a6_target, rfc6902_a6_patch, rfc6902_a6_result)) return -1;
+	if(!test_patch(rfc6902_a6_target, rfc6902_a6_patch, rfc6902_a6_result)) return false;
 
 	std::string rfc6902_a7_target = R"( { "foo": [ "all", "grass", "cows", "eat" ] })";
 	std::string rfc6902_a7_patch = R"([
 		{ "op": "move", "from": "/foo/1", "path": "/foo/3" }
 	])";
 	std::string rfc6902_a7_result = R"({ "foo": [ "all", "cows", "eat", "grass" ] })";
-	if(!test_patch(rfc6902_a7_target, rfc6902_a7_patch, rfc6902_a7_result)) return -1;
+	if(!test_patch(rfc6902_a7_target, rfc6902_a7_patch, rfc6902_a7_result)) return false;
 
 	std::string rfc6902_a8_target = R"({"baz": "qux","foo": [ "a", 2, "c" ]})";
 	std::string rfc6902_a8_patch = R"([
 		{ "op": "test", "path": "/baz", "value": "qux" },
 		{ "op": "test", "path": "/foo/1", "value": 2 }
 	])";
-	if(!test_patch(rfc6902_a8_target, rfc6902_a8_patch, rfc6902_a8_target)) return -1;
+	if(!test_patch(rfc6902_a8_target, rfc6902_a8_patch, rfc6902_a8_target)) return false;
 
 	std::string rfc6902_a9_target = R"({ "baz": "qux" })";
 	std::string rfc6902_a9_patch = R"([
 		{ "op": "test", "path": "/baz", "value": "bar" }
 	])";
-	if(!test_patch(rfc6902_a9_target, rfc6902_a9_patch, rfc6902_a9_target, false)) return -1;
+	if(!test_patch(rfc6902_a9_target, rfc6902_a9_patch, rfc6902_a9_target, false)) return false;
 
 	std::string rfc6902_a10_target = R"({ "foo": "bar" })";
 	std::string rfc6902_a10_patch = R"([
 		{ "op": "add", "path": "/child", "value": { "grandchild": { } } }
 	])";
 	std::string rfc6902_a10_result = R"({"foo": "bar","child": {"grandchild": {}}})";
-	if(!test_patch(rfc6902_a10_target, rfc6902_a10_patch, rfc6902_a10_result)) return -1;
+	if(!test_patch(rfc6902_a10_target, rfc6902_a10_patch, rfc6902_a10_result)) return false;
 
 	std::string rfc6902_a11_target = R"({ "foo": "bar" })";
 	std::string rfc6902_a11_patch = R"([
 		{ "op": "add", "path": "/baz", "value": "qux", "xyz": 123 }
 	])";
 	std::string rfc6902_a11_result = R"({"foo": "bar","baz": "qux"})";
-	if(!test_patch(rfc6902_a11_target, rfc6902_a11_patch, rfc6902_a11_result)) return -1;
+	if(!test_patch(rfc6902_a11_target, rfc6902_a11_patch, rfc6902_a11_result)) return false;
 
 	std::string rfc6902_a12_target = R"({ "foo": "bar" })";
 	std::string rfc6902_a12_patch = R"([
 		{ "op": "add", "path": "/baz/bat", "value": "qux" }
 	])";
-	if(!test_patch(rfc6902_a12_target, rfc6902_a12_patch, rfc6902_a12_target, false)) return -1;
+	if(!test_patch(rfc6902_a12_target, rfc6902_a12_patch, rfc6902_a12_target, false)) return false;
 
 	std::string rfc6902_a13_target = R"({})";
 	std::string rfc6902_a13_patch = R"([
 		{ "op": "add", "path": "/baz", "value": "qux", "op": "remove" }
 	])";
-	if(!test_patch(rfc6902_a13_target, rfc6902_a13_patch, rfc6902_a13_target, false, false)) return -1;
+	if(!test_patch(rfc6902_a13_target, rfc6902_a13_patch, rfc6902_a13_target, false, false)) return false;
 
 	std::string rfc6902_a14_target = R"({"/": 9,"~1": 10})";
 	std::string rfc6902_a14_patch = R"([
 		{"op": "test", "path": "/~01", "value": 10}
 	])";
 	std::string rfc6902_a14_result = R"({"/": 9,"~1": 10})";
-	if(!test_patch(rfc6902_a14_target, rfc6902_a14_patch, rfc6902_a14_result)) return -1;
+	if(!test_patch(rfc6902_a14_target, rfc6902_a14_patch, rfc6902_a14_result)) return false;
 
 	std::string rfc6902_a15_target = R"({"/": 9,"~1": 10})";
 	std::string rfc6902_a15_patch = R"([
 		{"op": "test", "path": "/~01", "value": "10"}
 	])";
-	if(!test_patch(rfc6902_a15_target, rfc6902_a15_patch, rfc6902_a15_target, false)) return -1;
+	if(!test_patch(rfc6902_a15_target, rfc6902_a15_patch, rfc6902_a15_target, false)) return false;
 
 	std::string rfc6902_a16_target = R"({ "foo": ["bar"] })";
 	std::string rfc6902_a16_patch = R"([
 		{ "op": "add", "path": "/foo/-", "value": ["abc", "def"] }
 	])";
 	std::string rfc6902_a16_result = R"({ "foo": ["bar", ["abc", "def"]] })";
-	if(!test_patch(rfc6902_a16_target, rfc6902_a16_patch, rfc6902_a16_result)) return -1;
+	if(!test_patch(rfc6902_a16_target, rfc6902_a16_patch, rfc6902_a16_result)) return false;
 
-	return 0;
+	return true;
 }
 
+#include "test.h"
+TEST(json_test);

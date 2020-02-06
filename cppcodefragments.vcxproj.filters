@@ -5,25 +5,38 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="include">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="test">
       <UniqueIdentifier>{43139e91-09cb-46e6-9cd5-54475cb61177}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\json.h">
-      <Filter>include</Filter>
-    </ClInclude>
+    <Filter Include="include/ccfrag">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\json.cc">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="source\json.cc">
-      <Filter>source</Filter>
+    <ClCompile Include="test\network.cc">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\uri.cc">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test.cc">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\echo_server.cc">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\http_server.cc">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\compress.cc">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\compress.sh">
+      <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -39,5 +52,25 @@
     <None Include="source\Makefile.am">
       <Filter>source</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\ccfrag\http.h">
+      <Filter>include/ccfrag</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccfrag\json.h">
+      <Filter>include/ccfrag</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccfrag\network.h">
+      <Filter>include/ccfrag</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccfrag\websocket.h">
+      <Filter>include/ccfrag</Filter>
+    </ClInclude>
+    <ClInclude Include="test\test.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccfrag\compress.h">
+      <Filter>include/ccfrag</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

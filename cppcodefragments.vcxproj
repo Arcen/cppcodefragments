@@ -119,11 +119,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\json.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="source\json.cc" />
+    <ClCompile Include="test\compress.cc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="test\echo_server.cc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="test\http_server.cc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="test\compress.sh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="test\test.cc" />
     <ClCompile Include="test\json.cc" />
+    <ClCompile Include="test\network.cc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="test\uri.cc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AUTHORS" />
@@ -134,6 +147,14 @@
     <None Include="README" />
     <None Include="source\Makefile.am" />
     <None Include="test\Makefile.am" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\ccfrag\http.h" />
+    <ClInclude Include="include\ccfrag\json.h" />
+    <ClInclude Include="include\ccfrag\compress.h" />
+    <ClInclude Include="include\ccfrag\network.h" />
+    <ClInclude Include="include\ccfrag\websocket.h" />
+    <ClInclude Include="test\test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

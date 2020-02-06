@@ -27,5 +27,11 @@ x64
 *.o
 *.log
 *.trs
-json_test
+test/json
+test/network
+test/uri
+test/compress
+test/echo_server
+test/http_server
+source/echo_server
 

@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([cppcodefragments], [1.0], [asakura@kbd.biglobe.ne.jp])
-AC_CONFIG_SRCDIR([include/json.h])
+AC_INIT([ccfrag], [1.0], [asakura@kbd.biglobe.ne.jp])
+AC_CONFIG_SRCDIR([include/ccfrag/json.h])
 AC_CONFIG_HEADERS([config.h])
 LT_INIT
 LT_CONFIG_LTDL_DIR([libltdl])
