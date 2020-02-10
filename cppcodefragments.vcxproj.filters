@@ -38,6 +38,9 @@
     <ClCompile Include="test\compress.sh">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="test\gzip.cc">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test\Makefile.am">
@@ -51,6 +54,9 @@
     <None Include="README" />
     <None Include="source\Makefile.am">
       <Filter>source</Filter>
+    </None>
+    <None Include="test\gzip.sh">
+      <Filter>test</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

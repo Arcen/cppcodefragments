@@ -26,8 +26,8 @@ namespace ccfrag{
 			}
 			bool operator<(const code_info& rhs) const
 			{
-				auto max_length = std::max(length, rhs.length);
-				return (code << (max_length - length)) < (rhs.code << (max_length - rhs.length));
+				if(length != rhs.length) return length < rhs.length;
+				return code < rhs.code;
 			}
 			bool operator==(const code_info& rhs) const
 			{
@@ -37,6 +37,9 @@ namespace ccfrag{
 		class huffman_codes
 		{
 		public:
+			enum{
+				MAX_BITS = 15
+			};
 			std::vector<code_info> codes;
 			std::map<code_info, literal_type> table;
 			size_t min_length;
@@ -59,6 +62,7 @@ namespace ccfrag{
 			bool setup_table()
 			{
 				if(codes.empty()){
+					fprintf(stderr, "empty table\n");
 					return false;
 				}
 				const size_t max_code = codes.size();
@@ -67,16 +71,17 @@ namespace ccfrag{
 				for(literal_type i = 0; i < max_code; ++i){
 					const auto& code = codes[i];
 					const auto& length = code.length;
+					min_length = (!min_length || !length) ? std::max(min_length, length) : std::min(min_length, length);
+					max_length = std::max(max_length, length);
 					if(length){
 						table[code] = i;
 					}
-					min_length = (!min_length) ? length : std::min(min_length, length);
-					max_length = std::max(max_length, length);
 				}
 				if(max_length == 0 && max_length == 0){
 					return true;
 				}
-				if(!min_length || !max_length || 15 < max_length){
+				if(!min_length || !max_length || MAX_BITS < max_length){
+					fprintf(stderr, "invalid length %zd, %zd\n", min_length, max_length);
 					return false;
 				}
 				return true;
@@ -87,20 +92,22 @@ namespace ccfrag{
 				// step1
 				std::map<size_t, size_t> bl_count;
 				for(size_t i = 0; i < max_code; ++i){
-					bl_count[codes[i].length]++;
+					if(codes[i].length){
+						if(MAX_BITS < codes[i].length){
+							fprintf(stderr, "over flow max bits %zd\n", codes[i].length);
+							return false;
+						}
+						bl_count[codes[i].length]++;
+					}
 				}
 				if(bl_count.empty()){
 					return setup_table();//no entry is ok
 				}
-				size_t max_bits = bl_count.rbegin()->first;
-				if(max_bits == 0){
-					return false;
-				}
 				// step2
-				std::vector<code_type> next_code(max_bits + 1, 0);
+				std::vector<code_type> next_code(MAX_BITS + 1, 0);
 				code_type code = 0;
 				bl_count[0] = 0;
-				for(int bits = 1; bits <= max_bits; ++bits){
+				for(int bits = 1; bits <= MAX_BITS; ++bits){
 					code = (code + bl_count[bits - 1]) << 1;
 					next_code[bits] = code;
 				}
@@ -109,8 +116,13 @@ namespace ccfrag{
 					auto& code = codes[n];
 					auto length = code.length;
 					if(length){
-						code.code = next_code[length]++;
+						code.code = next_code[length];
+						next_code[length]++;
 						if(code.code >> code.length){
+							for(auto it = bl_count.begin(), end = bl_count.end(); it != end; ++it){
+								fprintf(stderr, "bl_count[%zd]=%zd, next_code[%zd]=0x%zx\n", it->first, it->second, it->first, next_code[it->first]);
+							}
+							fprintf(stderr, "overflow tree, code=0x%x len=%d\n", code.code, code.length);
 							return false;
 						}
 					}
@@ -137,7 +149,7 @@ namespace ccfrag{
 					codes[i].code = 0xC0 + i - 280;			//11000000..11000111
 					codes[i].length = 8;
 				}
-				return true;
+				return setup_table();
 			}
 			bool setup_fixed_distance_table()
 			{
@@ -215,16 +227,24 @@ namespace ccfrag{
 				auto& table = hc.table;
 				code_info code;
 				code.length = min_length;
-				if(!read(code.code, min_length)){
-					return false;
+				for(size_t i = 0; i < min_length; ++i){
+					uint8_t c;
+					if(!read(c, 1)){
+						fprintf(stderr, "not enough length %zd\n", i);
+						return false;
+					}
+					code.code <<= 1;
+					code.code |= c;
 				}
 				auto it = table.find(code);
 				while(it == table.end()){
-					if(code.length > max_length){
+					if(code.length >= max_length){
+						fprintf(stderr, "overflow length=%zd code=%zx, size=%zd\n", code.length, code.code, table.size());
 						return false;
 					}
-					uint8_t c;
+					uint8_t c = 0;
 					if(!read(c, 1)){
+						fprintf(stderr, "not enough length %zd\n", code.length);
 						return false;
 					}
 					code.code <<= 1;
@@ -233,20 +253,6 @@ namespace ccfrag{
 					it = table.find(code);
 				}
 				value = it->second;
-				return true;
-			}
-			template<typename T>
-			bool read_extra_bits(T& value, size_t bits)
-			{
-				value = 0;
-				for(size_t i = 0; i < bits; ++i){
-					uint8_t c;
-					if(!in.read(c, 1)){
-						return false;
-					}
-					value <<= 1;
-					value |= c & 1;
-				}
 				return true;
 			}
 		};
@@ -279,12 +285,19 @@ namespace ccfrag{
 				}
 				size_t offset = output.size() - before;
 				while(length){
+					output.insert(output.end(), output[offset]);
+					--length;
+					++offset;
+				}
+/*
+				while(length){
 					size_t block = std::min(output.size() - offset, length);
 					std::vector<char> tmp(output.begin() + offset, output.begin() + offset + block);
 					output.insert(output.end(), tmp.begin(), tmp.end());
 					offset += block;
 					length -= block;
 				}
+*/
 				return true;
 			}
 		};
@@ -317,6 +330,7 @@ namespace ccfrag{
 			do {
 				int BTYPE;
 				if(!in.read(BFINAL, 1) || !in.read(BTYPE, 2)){
+					fprintf(stderr, "read failed BFINAL, BTYPE\n");
 					return false;
 				}
 				if(BTYPE == BTYPE_NO_COMPRESSION){
@@ -325,9 +339,11 @@ namespace ccfrag{
 					//read LEN and NLEN
 					uint16_t LEN, NLEN;
 					if(!in.read(LEN, 16) || !in.read(NLEN, 16)){
+						fprintf(stderr, "read failed LEN, NLEN\n");
 						return false;
 					}
 					if(LEN != ((~NLEN) & 0xFFFF)){
+						fprintf(stderr, "LEN, NLEN error %04x %04x\n", LEN, NLEN);
 						return false;
 					}
 					//copy LEN bytes of data to output
@@ -346,12 +362,14 @@ namespace ccfrag{
 						uint16_t HDIST;
 						uint16_t HCLEN;
 						if(!in.read(HLIT, 5) || !in.read(HDIST, 5) || !in.read(HCLEN, 4)){
+							fprintf(stderr, "read HLIT, HDIST, HCLEN error %04x %04x\n", HLIT, HDIST, HCLEN);
 							return false;
 						}
 						HLIT += 257;
 						HDIST += 1;
 						HCLEN += 4;
-						if(286 < HLIT || 32 < HDIST || 19 < HCLEN){
+						if(288 < HLIT || 32 < HDIST || 19 < HCLEN){
+							fprintf(stderr, "invalid HLIT, HDIST, HCLEN error %04x %04x\n", HLIT, HDIST, HCLEN);
 							return false;
 						}
 						huffman_codes hc_len(19);
@@ -360,22 +378,26 @@ namespace ccfrag{
 							auto& code = hc_len.codes[hc_index[i]];
 							auto& length = code.length;
 							if(!in.read(length, 3)){
+								fprintf(stderr, "read error HC\n");
 								return false;
 							}
 						}
 						if(!hc_len.setup_tree()){
+							fprintf(stderr, "failed to hc_len setup\n");
 							return false;
 						}
-						size_t literal_distance_lengths[286+32] = {};
+						size_t literal_distance_lengths[288+32] = {};
 						for(size_t i = 0; i < HLIT + HDIST; ){
 							auto& length = literal_distance_lengths[i];
 							if(!in.read_literal(length, hc_len)){
+								fprintf(stderr, "failed to read literal for HLIT, HDIST\n");
 								return false;
 							}
 							if(length < 16){
 								++i;
 							}else if(length == 16){
 								if(i == 0){
+									fprintf(stderr, "invalid reference for HLIT/HDIST\n");
 									return false;
 								}
 								size_t src = literal_distance_lengths[i-1];
@@ -383,6 +405,7 @@ namespace ccfrag{
 								if(!in.read(count, 2)){
 									return false;
 								}
+								count += 3;
 								for(size_t end = i + count; i < end && i < HLIT + HDIST; ++i){
 									literal_distance_lengths[i] = src;
 								}
@@ -391,41 +414,54 @@ namespace ccfrag{
 								if(!in.read(count, length == 17 ? 3 : 7)){
 									return false;
 								}
+								count += (length == 17 ? 3 : 11);
 								for(size_t end = i + count; i < end && i < HLIT + HDIST; ++i){
 									literal_distance_lengths[i] = 0;
 								}
 							}else{
+								fprintf(stderr, "invalid hc_len %zd\n", length);
 								return false;
 							}
 						}
 						dynamic_literal_length_hc.clear();
 						dynamic_distance_hc.clear();
 						for(uint16_t i = 0; i < HLIT; ++i){
-							dynamic_literal_length_hc.codes[i].length = literal_distance_lengths[HLIT + i];
+							dynamic_literal_length_hc.codes[i].length = literal_distance_lengths[i];
+						}
+						for(uint16_t i = HLIT; i < 288; ++i){
+							dynamic_literal_length_hc.codes[i].length = 0;
 						}
 						if(!dynamic_literal_length_hc.setup_tree()){
+							fprintf(stderr, "failed to dynamic_literal_length_hc setup\n");
 							return false;
 						}
 						for(uint16_t i = 0; i < HDIST; ++i){
 							dynamic_distance_hc.codes[i].length = literal_distance_lengths[HLIT+i];
 						}
+						for(uint16_t i = HDIST; i < 32; ++i){
+							dynamic_distance_hc.codes[i].length = 0;
+						}
 						if(!dynamic_distance_hc.setup_tree()){
+							fprintf(stderr, "failed to dynamic_distance_hc setup\n");
 							return false;
 						}
 					}else if(BTYPE != BTYPE_FIXED_HUFFMAN_CODES){
+						fprintf(stderr, "invalid BTYPE %d\n", BTYPE);
 						return false;
 					}
 					while(true){
 						static const int end_of_block = 256;
 						//decode literal/length value from input stream
 						literal_type value;
-						if(!in.read_literal(value, *hc)){
+						if(!in.read_literal(value, literal_length_hc)){
+							fprintf(stderr, "failed to read literal \n");
 							return false;
 						}
 						if(value < 256){
 							//copy value (literal byte) to output stream
 							char c = value;
 							if(!out.write(&c, 1)){
+								fprintf(stderr, "output error\n");
 								return false;
 							}
 						}else if(value == end_of_block){
@@ -442,31 +478,37 @@ namespace ccfrag{
 								67, 83, 99, 115, 131, 163, 195, 227, 258
 							};
 							uint16_t length = 0;
-							if(in.read_extra_bits(length, length_extra_bits_table[value - 257])){
+							size_t length_extra_bits = length_extra_bits_table[value - 257];
+							if(!in.read(length, length_extra_bits)){
+								fprintf(stderr, "failed to read length extra bits %zd\n", length_extra_bits);
 								return false;
 							}
 							length += length_base_table[value - 257];
 							//decode distance from input stream
 							literal_type distance_value;
-							if(!in.read(distance_value, 5)){
+							if(!in.read_literal(distance_value, distance_hc)){
 								return false;
 							}
 							if(30 <= distance_value){
+								fprintf(stderr, "distance is invalid %d\n", distance_value);
 								return false;
 							}
 							static const uint16_t distance_base_table[30] = {
 								1, 2, 3, 4, 5, 7, 9, 13, 17, 25,
-								33, 49, 65, 97, 129, 193, 257, 385, 513, 768,
-								1024, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577
+								33, 49, 65, 97, 129, 193, 257, 385, 513, 769,
+								1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577
 							};
 							uint16_t distance = 0;
-							if(in.read_extra_bits(distance, distance < 4 ? 0 : (distance / 2 - 1))){
+							size_t distance_extra_bits = distance_value < 4 ? 0 : (distance_value / 2 - 1);
+							if(!in.read(distance, distance_extra_bits)){
+								fprintf(stderr, "failed to read distance extra bits %zd\n", distance_extra_bits);
 								return false;
 							}
 							distance += distance_base_table[distance_value];
 							//move backwards distance bytes in the output stream, 
 							// and copy length bytes from this position to the output stream.
 							if(!out.write_reference(distance, length)){
+								fprintf(stderr, "reference copy failed currentsize=%zd, distance=%zd lenght=%zd\n", out.output.size(), distance, length);
 								return false;
 							}
 						}
