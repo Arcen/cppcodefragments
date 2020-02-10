@@ -72,5 +72,11 @@
     <ClInclude Include="include\ccfrag\compress.h">
       <Filter>include/ccfrag</Filter>
     </ClInclude>
+    <ClInclude Include="include\ccfrag\deflate.h">
+      <Filter>include/ccfrag</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ccfrag\gzip.h">
+      <Filter>include/ccfrag</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

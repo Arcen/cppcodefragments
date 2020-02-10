@@ -9,6 +9,7 @@
 #include <cctype>
 #include <algorithm>
 #include <sstream>
+#include <ccfrag/compress.h>
 
 namespace ccfrag{
 	// specification
@@ -1507,8 +1508,13 @@ namespace ccfrag{
 					auto it = transfer_codings.rbegin();
 					++it;
 					for(auto end = transfer_codings.rend(); it != end; ++it){
+						std::vector<char> tmp;
 						switch(it->coding){
 						case transfer_coding::compress:
+							if(!ccfrag::compress::decode(tmp, body)){
+								return false;
+							}
+							tmp.swap(body);
 							break;
 						case transfer_coding::deflate:
 							break;

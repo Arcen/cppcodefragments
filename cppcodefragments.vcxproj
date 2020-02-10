@@ -149,6 +149,8 @@
     <None Include="test\Makefile.am" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\ccfrag\deflate.h" />
+    <ClInclude Include="include\ccfrag\gzip.h" />
     <ClInclude Include="include\ccfrag\http.h" />
     <ClInclude Include="include\ccfrag\json.h" />
     <ClInclude Include="include\ccfrag\compress.h" />

@@ -8,7 +8,6 @@ if [ $? != 0 ] ; then
  return 1
 fi
 
-
 cat compress | ./compress | uncompress > .tmp
 diff .tmp compress &> /dev/null
 if [ $? != 0 ] ; then
