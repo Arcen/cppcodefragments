@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <sstream>
 #include <ccfrag/compress.h>
+#include <ccfrag/gzip.h>
 
 namespace ccfrag{
 	// specification
@@ -1514,15 +1515,21 @@ namespace ccfrag{
 							if(!ccfrag::compress::decode(tmp, body)){
 								return false;
 							}
-							tmp.swap(body);
 							break;
 						case transfer_coding::deflate:
+							if(!ccfrag::deflate::decode(tmp, body)){
+								return false;
+							}
 							break;
 						case transfer_coding::gzip:
+							if(!ccfrag::gzip::decode(tmp, body)){
+								return false;
+							}
 							break;
 						default:
 							return false;
 						}
+						tmp.swap(body);
 					}
 					return true;
 				}

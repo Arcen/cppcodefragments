@@ -119,6 +119,27 @@ namespace ccfrag{
 				return true;
 			}
 		};
+		class output_type{
+		public:
+			std::deque<char> output;
+			output_type()
+			{
+			}
+			template<typename T>
+			bool write(T data, size_t length = sizeof(T))
+			{
+				if(length > 8){
+					return false;
+				}
+				char wk[8] = {0};
+				for(size_t i = 0; i < length; ++i){
+					wk[i] = static_cast<char>(data & 0xFF);
+					data >>= 8;
+				}
+				output.insert(output.end(), wk, wk + length);
+				return true;
+			}
+		};
 		enum{
 			CM_DEFLATE = 8,
 			FLG_FTEXT = 1 << 0,
@@ -132,7 +153,39 @@ namespace ccfrag{
 		};
 		static bool encode(std::vector<char>& output, const std::vector<char>& input)
 		{
-			return false;
+			output_type out;
+			uint8_t ID1 = 0x1F;
+			uint8_t ID2 = 0x8B;
+			uint8_t CM = CM_DEFLATE;
+			uint8_t FLG = 0;
+			uint32_t MTIME = 0; // Modification TIME
+			uint8_t XFL = 0; // eXtra FLags
+			uint8_t OS = 0;
+			if(!out.write(ID1) ||
+				!out.write(ID2) || 
+				!out.write(CM) ||
+				!out.write(FLG) ||
+				!out.write(MTIME) ||
+				!out.write(XFL) ||
+				!out.write(OS)){
+				return false;
+			}
+			std::vector<char> encoded_data;
+			if(!ccfrag::deflate::encode(encoded_data, input)){
+				return false;
+			}
+			output.reserve(encoded_data.size() + out.output.size() + 8);
+			output.assign(out.output.begin(), out.output.end());
+			output.insert(output.end(), encoded_data.begin(), encoded_data.end());
+			uint32_t CRC32 = crc32::execute(input.data(), input.data() + input.size());
+			uint32_t ISIZE = (input.size() & 0xFFFFFFFF);
+			out.output.clear();
+			if(!out.write(CRC32) ||
+				!out.write(ISIZE)){
+				return false;
+			}
+			output.insert(output.end(), out.output.begin(), out.output.end());
+			return true;
 		}
 		static bool decode(std::vector<char>& output, const std::vector<char>& input)
 		{

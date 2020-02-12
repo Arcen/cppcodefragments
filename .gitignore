@@ -31,6 +31,7 @@ test/json
 test/network
 test/uri
 test/compress
+test/gzip
 test/echo_server
 test/http_server
 source/echo_server
